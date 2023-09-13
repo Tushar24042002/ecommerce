@@ -12,6 +12,8 @@ router.put('/:id',productController.updateProductById);
 router.delete('/:id',productController.deleteProductById);
 
 router.delete('/:productId/images/:imageId',productController.deleteProductImageById);
+router.post('/:productId',productController.addProductImagesById);
+
 
 // Add more routes for updating, deleting, and fetching products
 

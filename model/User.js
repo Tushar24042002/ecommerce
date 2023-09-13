@@ -25,8 +25,11 @@ const userSchema = new mongoose.Schema({
   verificationToken: String,
   documents: [
     {
-      name: String, // Document name
-      fileUrl: String, // URL or path to the uploaded file
+      id: {
+        type: mongoose.Schema.Types.ObjectId, // Use ObjectId for image IDs
+        default: mongoose.Types.ObjectId, // Generate a new ID by default
+      },
+      url: String,
       isVerified: {
         type: Boolean,
         default: false, // New documents are not verified by default

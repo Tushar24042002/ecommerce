@@ -232,3 +232,64 @@ exports.deleteProductImageById = async (req,res)=>{
   }
 };
 
+// Add images to a product by product ID
+
+
+exports.addProductImagesById = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+
+    // Validate that the provided ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
+    const product = await Product.findById(productId);
+
+    // Check if the product with the given ID exists
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Define the folder name for the product based on its name
+    const productFolderName = product.name.replace(/ /g, '_'); // Replace spaces with underscores
+    const productFolderPath = `./public/products/${productFolderName}`;
+    await fs.ensureDir(productFolderPath);
+
+    // Handle adding product images
+    if (req.files && req.files.images) {
+      let images = req.files.images; // Define images as a variable
+      if (!Array.isArray(images)) {
+        images = [images];
+      }
+
+      // Process and add each image to the product's 'images' array
+      for (const image of images) {
+        const imageId = new mongoose.Types.ObjectId(); 
+        const imageFileName = `${imageId}_${Date.now()}_${image.name}`;
+        const imageUrl = `/products/${productFolderName}/${imageFileName}`;
+        
+        // Move the image to the product's folder and save it
+        await image.mv(`${productFolderPath}/${imageFileName}`);
+
+        // Create an image object and add it to the product's 'images' array
+        const imageObject = {
+          id: imageId,
+          url: imageUrl,
+        };
+        product.images.push(imageObject);
+      }
+
+      // Save the updated product with the new images
+      await product.save();
+
+      res.status(201).json({ message: 'Images added to product successfully', product });
+    } else {
+      return res.status(400).json({ message: 'No images uploaded' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
