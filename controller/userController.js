@@ -88,7 +88,7 @@ exports.register = async (req, res) => {
       from: 'admin@studybuddy.store',
       to: email,
       subject: 'Account Verification',
-      text: `To verify your account, please click the following link:  ${req.protocol}://${req.get('host')}/users/verify/${token}`,
+      text: `To verify your account, please click the following link:  http://localhost:3000/emailVerification?token=${newUser.verificationToken}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -98,7 +98,7 @@ exports.register = async (req, res) => {
       }
 
       console.log(`Email sent: ${info.response}`);
-      res.status(201).json({ message: 'User registered successfully. Please check your email for verification.' });
+      res.status(201).json({ success : true,message: 'User registered successfully. Please check your email for verification.' });
     });
   } catch (error) {
     console.error(error);
@@ -136,7 +136,7 @@ exports.login = async (req, res) => {
       if (err) throw err;
       res.status(200).json({
         success: true,
-        token: `Bearer ${token}`,
+        token: `${token}`,
       });
     });
   } catch (error) {

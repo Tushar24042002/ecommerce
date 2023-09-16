@@ -1,13 +1,17 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 8080;
 const mongoose = require('./config/config_db'); 
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const fs = require('fs-extra');
+const cors = require('cors');
 app.use(express.json());
 app.use(fileUpload());
 
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Parse JSON request bodies
 app.use(bodyParser.json());
@@ -38,6 +42,12 @@ app.use('/users', userRoutes);
 const adminRouter = require('./router/admin');
 
 app.use('/admin', adminRouter);
+
+
+// superadmin
+const superAdminRouter = require('./router/superAdmin');
+
+app.use('/superAdmin', superAdminRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

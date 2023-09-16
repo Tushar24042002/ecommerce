@@ -31,7 +31,7 @@ const upload = multer({ storage: storage });
 
 router.post('/register', userController.register);
 router.post('/login', userController.login);
-router.get('/verify/:token', userController.verifyEmail);
+router.post('/verify/:token', userController.verifyEmail);
 router.post('/upload-document', authMiddleware ,userController.uploadDocument);
 router.get('/users', userController.getAllUsers);
 module.exports = router;
