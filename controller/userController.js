@@ -232,9 +232,10 @@ exports.uploadDocument = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
+  console.log(res);
   try {
     res.clearCookie('AuthorizationKey'); // For cookies
-  localStorage.setItem('isLoggedIn', 'false');
+  // localStorage.setItem('isLoggedIn', 'false');
   res.status(201).json({ message: 'logged out successfully', success : true });
   } catch (error) {
     console.error(error);
