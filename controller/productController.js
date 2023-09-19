@@ -1,18 +1,28 @@
 const Product = require('../model/product');
 const mongoose = require('mongoose');
 const fs = require('fs-extra');
+const User = require('../model/User');
 
 
 
 let images; 
 exports.createProduct = async (req, res) => {
   try {
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+
+    // Check if the user with the given ID exists
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
+    }
+
     if (!req.body.name || !req.body.price) {
       return res.status(400).json({ message: 'Both "name" and "price" are required fields.' });
     }
 
     const newProduct = new Product({
       name: req.body.name,
+      user : userId,
       description: req.body.description || '',
       price: req.body.price,
       category: req.body.category || '',
