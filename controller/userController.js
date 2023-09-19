@@ -182,12 +182,6 @@ exports.uploadDocument = async (req, res) => {
 
   try {
     const userId = req.user.id;
-
-    // Validate that the provided ID is a valid MongoDB ObjectId
-    // if (!mongoose.Types.ObjectId.isValid(userId)) {
-    //   return res.status(400).json({ message: 'Invalid product ID' });
-    // }
-
     const user = await User.findById(userId);
 
     // Check if the user with the given ID exists
@@ -237,6 +231,16 @@ exports.uploadDocument = async (req, res) => {
   }
 };
 
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie('AuthorizationKey'); // For cookies
+  localStorage.setItem('isLoggedIn', 'false');
+  res.status(201).json({ message: 'logged out successfully', success : true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 
