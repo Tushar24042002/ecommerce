@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config_db'); // Import your configuration file
 const User = require('../model/User'); // Import your User model
 const authMiddleware = async (req, res, next) => {
-    // Get the token from the request headers
     const token = req.header('AuthorizationKey');
   // console.log(token);
     // Check if the token is missing

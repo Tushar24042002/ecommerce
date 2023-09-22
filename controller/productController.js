@@ -16,6 +16,7 @@ exports.createProduct = async (req, res) => {
       return res.status(404).json({ message: 'user not found' });
     }
 
+
     if (!req.body.name || !req.body.price) {
       return res.status(400).json({ message: 'Both "name" and "price" are required fields.' });
     }
@@ -37,7 +38,7 @@ exports.createProduct = async (req, res) => {
 
     // Handle image uploads
     if (req.files && req.files.images) {
-      let images = req.files.images; // Define images as a variable
+       images = req.files.images; // Define images as a variable
       if (!Array.isArray(images)) {
         images = [images];
       }
@@ -202,8 +203,19 @@ exports.deleteProductById = async (req, res) => {
 // Delete a product image by image ID
 exports.deleteProductImageById = async (req,res)=>{
   try {
+
+
+
     const productId = req.params.productId;
     const imageId = req.params.imageId;
+
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+
+    // Check if the user with the given ID exists
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
+    }
 
     // Validate that the provided IDs are valid MongoDB ObjectIds
     if (!mongoose.Types.ObjectId.isValid(productId) || !mongoose.Types.ObjectId.isValid(imageId)) {
