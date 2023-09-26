@@ -137,6 +137,11 @@ exports.login = async (req, res) => {
       res.status(200).json({
         success: true,
         token: `${token}`,
+        data :{
+          name : user.name,
+          email : user.email,
+        },
+        userType : user.isAdmin
       });
     });
   } catch (error) {

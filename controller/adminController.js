@@ -77,6 +77,12 @@ exports.login = async (req, res) => {
       res.status(200).json({
         success: true,
         token: `Bearer ${token}`,
+        data :{
+          name : admin.name,
+          email : admin.email,
+        },
+        userType : admin.isAdmin
+
       });
     });
   } catch (error) {
