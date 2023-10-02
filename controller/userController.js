@@ -373,4 +373,46 @@ exports.updateUserPassword = async (req, res) => {
 
 
 
+exports.getUserById = async (req, res) => {
+  console.log(req.params.userId);
+  try {
+    const userId = req.params.userId;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+    // Ensure that you don't update isAdmin and isVerified
+    const user = await User.findOne({_id : userId});
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, status: 200, data: user, message: "User Data Found" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+exports.getUserByEmail = async (req, res) => {
+  console.log(req.params.email);
+  try {
+    const userEmail = req.params.email;
+
+    // Ensure that you don't update isAdmin and isVerified
+    const user = await User.findOne({email : userEmail});
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, status: 200, data: user, message: "User Data Found" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
 
