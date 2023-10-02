@@ -34,5 +34,8 @@ router.post('/login', userController.login);
 router.post('/verify/:token', userController.verifyEmail);
 router.post('/upload-document', authMiddleware ,userController.uploadDocument);
 router.get('/users', userController.getAllUsers);
+router.get('/users/:id',userController.getUsers);
+router.get('/users/email/:email',userController.getUsersByEmail);
+
 router.get('/logout', userController.logout);
 module.exports = router;

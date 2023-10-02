@@ -260,3 +260,54 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+exports.getUsers = async (req, res) => {
+  try {
+
+    const userId = req.params.id;
+
+    // Validate that the provided ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid User ID' });
+    }
+
+    const userData = await User.find({_id : userId});
+
+    // Check if the product with the given ID exists
+    if (!userData) {
+      return res.status(404).json({ message: 'userData not found' });
+    }
+
+    res.status(200).json(userData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+exports.getUsersByEmail = async (req, res) => {
+  try {
+
+    const emailId = req.params.email;
+
+    // Validate that the provided ID is a valid MongoDB ObjectId
+    // if (!mongoose.Types.ObjectId.isValid(emailId)) {
+    //   return res.status(400).json({ message: 'Invalid User ID' });
+    // }
+
+    const userData = await User.find({email : emailId});
+
+    // Check if the product with the given ID exists
+    if (!userData) {
+      return res.status(404).json({ message: 'userData not found' });
+    }
+
+    res.status(200).json(userData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
