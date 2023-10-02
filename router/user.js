@@ -33,9 +33,14 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.post('/verify/:token', userController.verifyEmail);
 router.post('/upload-document', authMiddleware ,userController.uploadDocument);
+router.delete('/delete-document/:documentId',authMiddleware, userController.deleteDocumentById);
 router.get('/users', userController.getAllUsers);
-router.get('/users/:id',userController.getUsers);
-router.get('/users/email/:email',userController.getUsersByEmail);
+router.put('/users/:userId',userController.updateUser);
+router.put('/users/updatePassword/:userId',userController.updateUserPassword);
+
+
+
+
 
 router.get('/logout', userController.logout);
 module.exports = router;

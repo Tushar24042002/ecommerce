@@ -1,6 +1,7 @@
 // controllers/userController.js
-const bcrypt = require('bcryptjs');
+
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../model/User');
 const config = require('../config/config_db');
 const nodemailer = require('nodemailer');
@@ -18,10 +19,6 @@ const transporter = nodemailer.createTransport({
   },
   secure: false, // Set to true if your SMTP server requires secure (TLS/SSL) connections
 });
-
-
-
-
 const { validationResult } = require('express-validator');
 const { use } = require('passport');
 
@@ -98,13 +95,14 @@ exports.register = async (req, res) => {
       }
 
       console.log(`Email sent: ${info.response}`);
-      res.status(201).json({ success : true,message: 'User registered successfully. Please check your email for verification.' });
+      res.status(201).json({ success: true, message: 'User registered successfully. Please check your email for verification.' });
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {
@@ -137,11 +135,11 @@ exports.login = async (req, res) => {
       res.status(200).json({
         success: true,
         token: `${token}`,
-        data :{
-          name : user.name,
-          email : user.email,
+        data: {
+          name: user.name,
+          email: user.email,
         },
-        userType : user.isAdmin
+        userType: user.isAdmin
       });
     });
   } catch (error) {
@@ -149,6 +147,7 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 
 
@@ -208,10 +207,10 @@ exports.uploadDocument = async (req, res) => {
 
       // Process and add each image to the product's 'images' array
       for (const image of images) {
-        const imageId = new mongoose.Types.ObjectId(); 
+        const imageId = new mongoose.Types.ObjectId();
         const imageFileName = `${imageId}_${Date.now()}_${image.name}`;
-        const imageUrl = `/products/${userFolderName}/${imageFileName}`;
-        
+        const imageUrl = `/usersDocuments/${userFolderName}/${imageFileName}`;
+
         // Move the image to the product's folder and save it
         await image.mv(`${userFolderPath}/${imageFileName}`);
 
@@ -226,22 +225,67 @@ exports.uploadDocument = async (req, res) => {
       // Save the updated product with the new images
       await user.save();
 
-      res.status(201).json({ message: 'Images added to product successfully', user});
+      res.status(201).json({ success: true, message: 'Images added to product successfully', user });
     } else {
-      return res.status(400).json({ message: 'No images uploaded' });
+      return res.status(400).json({ success: false, message: 'No images uploaded' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+
+// Delete a product image by image ID
+exports.deleteDocumentById = async (req, res) => {
+  try {
+    const documentId = req.params.documentId;
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+
+    // Check if the user with the given ID exists
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
+    }
+
+    // Validate that the provided IDs are valid MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(documentId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid document id  or user ID' });
+    }
+    // Find the image to delete by its ID
+    const imageToDelete = user.documents.find((image) => image.id.toString() === documentId);
+
+    // Check if the image with the given ID exists
+    if (!imageToDelete) {
+      return res.status(404).json({ success: false, message: 'Image not found' });
+    }
+
+    // Delete the image file from the server
+    const imagePath = `./public${imageToDelete.url}`;
+    await fs.remove(imagePath);
+
+    // Remove the image object from the product's 'images' array
+    user.documents = user.documents.filter((image) => image.id.toString() !== documentId);
+
+    // Save the updated product
+    await user.save();
+
+    res.status(200).json({ success: true, status: 200, message: 'Image deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+
 
 exports.logout = async (req, res) => {
   console.log(res);
   try {
     res.clearCookie('AuthorizationKey'); // For cookies
-  // localStorage.setItem('isLoggedIn', 'false');
-  res.status(201).json({ message: 'logged out successfully', success : true });
+    // localStorage.setItem('isLoggedIn', 'false');
+    res.status(201).json({ message: 'logged out successfully', success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -262,52 +306,71 @@ exports.getAllUsers = async (req, res) => {
 };
 
 
-exports.getUsers = async (req, res) => {
+exports.updateUser = async (req, res) => {
   try {
+    const userId = req.params.userId;
 
-    const userId = req.params.id;
-
-    // Validate that the provided ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid User ID' });
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
 
-    const userData = await User.find({_id : userId});
+    // Extract the fields you want to update from the request body
+    const { isAdmin, isVerified, isVerifiedByAdmin, password, email, ...updateFields } = req.body;
 
-    // Check if the product with the given ID exists
-    if (!userData) {
-      return res.status(404).json({ message: 'userData not found' });
+    // Ensure that you don't update isAdmin and isVerified
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    if (!updateUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json(userData);
+    res.status(200).json({ success: true, status: 200, data: updateFields, message: "Update Successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
 
 
-exports.getUsersByEmail = async (req, res) => {
+
+exports.updateUserPassword = async (req, res) => {
   try {
+    const userId = req.params.userId;
+    const newPassword = req.body.newPassword;
+    console.log(newPassword, userId);
 
-    const emailId = req.params.email;
-
-    // Validate that the provided ID is a valid MongoDB ObjectId
-    // if (!mongoose.Types.ObjectId.isValid(emailId)) {
-    //   return res.status(400).json({ message: 'Invalid User ID' });
-    // }
-
-    const userData = await User.find({email : emailId});
-
-    // Check if the product with the given ID exists
-    if (!userData) {
-      return res.status(404).json({ message: 'userData not found' });
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
     }
 
-    res.status(200).json(userData);
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt); // 10 is the salt rounds, you can adjust it as needed
+
+    // Update the user's password
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updateUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, status: 200, message: "Password Update Successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+
+
+
+
