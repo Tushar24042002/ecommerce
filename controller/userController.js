@@ -198,23 +198,23 @@ exports.uploadDocument = async (req, res) => {
     const userFolderPath = `./public/usersDocuments/${userFolderName}`;
     await fs.ensureDir(userFolderPath);
 
-    // Handle adding product images
+    // Handle adding user images
     if (req.files && req.files.images) {
       let images = req.files.images; // Define images as a variable
       if (!Array.isArray(images)) {
         images = [images];
       }
 
-      // Process and add each image to the product's 'images' array
+      // Process and add each image to the user's 'images' array
       for (const image of images) {
         const imageId = new mongoose.Types.ObjectId();
         const imageFileName = `${imageId}_${Date.now()}_${image.name}`;
         const imageUrl = `/usersDocuments/${userFolderName}/${imageFileName}`;
 
-        // Move the image to the product's folder and save it
+        // Move the image to the user's folder and save it
         await image.mv(`${userFolderPath}/${imageFileName}`);
 
-        // Create an image object and add it to the product's 'images' array
+        // Create an image object and add it to the user's 'images' array
         const imageObject = {
           id: imageId,
           url: imageUrl,
@@ -225,7 +225,7 @@ exports.uploadDocument = async (req, res) => {
       // Save the updated product with the new images
       await user.save();
 
-      res.status(201).json({ success: true, message: 'Images added to product successfully', user });
+      res.status(201).json({ success: true, message: 'Images added to user successfully', user });
     } else {
       return res.status(400).json({ success: false, message: 'No images uploaded' });
     }
