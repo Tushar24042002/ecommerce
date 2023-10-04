@@ -38,8 +38,9 @@ router.get('/users', userController.getAllUsers);
 router.put('/users/updateDetails/:userId',userController.updateUser);
 router.put('/users/updatePassword/:userId',userController.updateUserPassword);
 router.get('/users/:userId',userController.getUserById);
-router.get('/users/email/:email',userController.getUserByEmail);
+router.post('/users/email/:email',userController.getUserByEmail);
 
+router.post('/forgotverify/:token', userController.getUserByToken);
 
 
 

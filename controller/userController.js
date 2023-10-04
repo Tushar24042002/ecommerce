@@ -407,6 +407,29 @@ exports.getUserByEmail = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+     // Generate a verification token
+    const token = crypto.randomBytes(20).toString('hex');
+    user.verificationToken = token;
+    await user.save();
+ const mailOptions = {
+      from: 'admin@studybuddy.store',
+      to: userEmail,
+      subject: 'Email Account Verification',
+      text: `To change your password , firstly verify your account, please click the following link:  http://localhost:3000/forgotemailVerification?token=${user.verificationToken}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      console.log(`Email sent: ${info.response}`);
+      res.status(201).json({ success: true, message: 'User Find  successfully in our Database. Please check your email for verification.' });
+    });
+
+
+
     res.status(200).json({ success: true, status: 200, data: user, message: "User Data Found" });
   } catch (error) {
     console.error(error);
@@ -416,3 +439,24 @@ exports.getUserByEmail = async (req, res) => {
 
 
 
+
+exports.getUserByToken = async (req, res) => {
+  try {
+    const token = req.params.token;
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid verification token' });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    res.status(200).json({data : user, message: 'Email verified successfully- forgot password' })
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
