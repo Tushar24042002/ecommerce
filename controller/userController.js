@@ -85,7 +85,7 @@ exports.register = async (req, res) => {
       from: 'admin@studybuddy.store',
       to: email,
       subject: 'Account Verification',
-      text: `To verify your account, please click the following link:  http://localhost:3000/emailVerification?token=${newUser.verificationToken}`,
+      text: `To verify your account, please click the following link:  https://ecommerce-tushar.netlify.app/emailVerification?token=${newUser.verificationToken}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -415,7 +415,7 @@ exports.getUserByEmail = async (req, res) => {
       from: 'admin@studybuddy.store',
       to: userEmail,
       subject: 'Email Account Verification',
-      text: `To change your password , firstly verify your account, please click the following link:  http://localhost:3000/forgotemailVerification?token=${user.verificationToken}`,
+      text: `To change your password , firstly verify your account, please click the following link:  https://ecommerce-tushar.netlify.app/forgotemailVerification?token=${user.verificationToken}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
