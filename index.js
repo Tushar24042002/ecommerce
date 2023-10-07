@@ -57,6 +57,14 @@ app.use('/users', userRoutes);
 const adminRouter = require('./router/admin');
 app.use('/admin', adminRouter);
 
+const customerRouter = require('./router/customer');
+app.use('/customers', customerRouter);
+
+// cart
+const cartROutes = require('./router/cart');
+app.use('/cart', cartROutes);
+
+
 // superadmin
 const superAdminRouter = require('./router/superAdmin');
 app.use('/superAdmin', superAdminRouter);
