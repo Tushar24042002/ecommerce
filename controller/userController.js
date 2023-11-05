@@ -340,21 +340,24 @@ exports.updateUser = async (req, res) => {
 
 exports.updateUserPassword = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const newPassword = req.body.newPassword;
-    console.log(newPassword, userId);
+    const { userId, email, newPassword } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
     }
 
     // Hash the new password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt); // 10 is the salt rounds, you can adjust it as needed
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update the user's password
-    const updateUser = await User.findByIdAndUpdate(
-      userId,
+    // Define the filter based on userId or email
+    const filter = userId ? { _id: userId } : { email };
+
+    // Update the user's password based on userId or email
+    const updateUser = await User.findOneAndUpdate(
+      filter,
       { password: hashedPassword },
       { new: true }
     );
@@ -363,7 +366,7 @@ exports.updateUserPassword = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json({ success: true, status: 200, message: "Password Update Successfully" });
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal server error' });

@@ -36,7 +36,7 @@ router.post('/upload-document', authMiddleware ,userController.uploadDocument);
 router.delete('/delete-document/:documentId',authMiddleware, userController.deleteDocumentById);
 router.get('/users', userController.getAllUsers);
 router.put('/users/updateDetails/:userId',userController.updateUser);
-router.put('/users/updatePassword/:userId',userController.updateUserPassword);
+router.put('/users/updatePassword',userController.updateUserPassword);
 router.get('/users/:userId',userController.getUserById);
 router.post('/users/email/:email',userController.getUserByEmail);
 
