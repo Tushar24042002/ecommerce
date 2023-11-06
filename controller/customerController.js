@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const Customer = require('../model/Customer');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const otpGenerator = require('otp-generator');
 const mongoose = require('mongoose');
 const transporter = nodemailer.createTransport({
   host: 'server5.dnspark.in',
@@ -37,17 +38,21 @@ exports.register = async (req, res) => {
     newCustomer.password = await bcrypt.hash(password, salt);
 
     // Generate a verification token
-    const token = crypto.randomBytes(20).toString('hex');
+    const token = otpGenerator.generate(6, {digits: true,alphabets: false, specialChars: false });
+    // const token = crypto.randomBytes(20).toString('hex');
     newCustomer.verificationToken = token;
 
     await newCustomer.save();
+
+    // const msg =  `To verify your account, please click the following link:  http://localhost:3000/customer/emailVerification?token=${newCustomer.verificationToken}`;
+    const msg =  `To verify your account, please click the following OTP:  ${newCustomer.verificationToken}`;
 
     // Send verification email
     const mailOptions = {
       from: 'admin@studybuddy.store',
       to: email,
       subject: 'Account Verification',
-      text: `To verify your account, please click the following link:  http://localhost:3000/customer/emailVerification?token=${newCustomer.verificationToken}`,
+      text: msg,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -115,10 +120,18 @@ exports.login = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     const token = req.params.token;
+    const email = req.body.email;
+    if (!email) {
+      return res.status(400).json({ message: 'Invalid Email' });
+    }
     const customer = await Customer.findOne({ verificationToken: token });
 
     if (!customer) {
       return res.status(400).json({ message: 'Invalid verification token' });
+    }
+
+    if(customer.email != email){
+      return res.status(400).json({ message: 'Invalid User or OTP' });
     }
 
     customer.isVerified = true;
