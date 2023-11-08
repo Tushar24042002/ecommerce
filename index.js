@@ -7,7 +7,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs-extra');
 
 const app = express();
-app.use(cors();
+app.use(cors());
 app.use(express.json());
 app.use(fileUpload());
 const path = require("path");
