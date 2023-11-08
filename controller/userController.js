@@ -23,6 +23,10 @@ const { validationResult } = require('express-validator');
 const { use } = require('passport');
 
 const BASE_URL = './public';
+if (!fs.existsSync(BASE_URL)) {
+  fs.mkdirSync(BASE_URL);
+}
+
 const usersDocumentsPath = `${BASE_URL}/usersDocuments/`;
 
 // Create the destination directory if it doesn't exist
