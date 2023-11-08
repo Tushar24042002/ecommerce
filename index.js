@@ -7,7 +7,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs-extra');
 
 const app = express();
-app.use(cors());
+app.use(cors();
 app.use(express.json());
 app.use(fileUpload());
 const path = require("path");
@@ -18,13 +18,20 @@ const { dirname } = require('path');
 // Get the directory name and filename of the current script
 // const __filenameImported = fileURLToPath(import.meta.url);
 // const __dirnameImported = dirname(__filenameImported);
-// Enable CORS for all routes
 
+// Enable CORS for all routes
 
 const __filenameImported = require('path').resolve();
 const __dirnameImported = require('path').dirname(__filenameImported);
 
-app.use('/public', express.static(path.join(__dirnameImported, 'public')));
+const publicDirectory = path.join(__dirnameImported, 'public');
+
+// Check if the 'public' directory exists, and create it if it doesn't
+if (!fs.existsSync(publicDirectory)) {
+  fs.mkdirSync(publicDirectory);
+}
+
+app.use('/public', express.static(publicDirectory));
 
 
 
