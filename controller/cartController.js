@@ -37,18 +37,25 @@ exports.addToCart = async (req,res) =>{
   }
 }
 // .populate('items.product')
-// Get the user's cart
-exports.getCart= async(req,res)=> {
+// Assuming you have the required imports and dependencies
+
+exports.getCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    const cart = await Cart.findOne({ user: userId }).populate('items');
+    const cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: 'items.product',
+        model: 'Product', // Name of the Product model
+      })
+      .exec();
 
     res.status(200).json(cart);
-
   } catch (error) {
+    console.error(error);
     throw error;
   }
-}
+};
+
 
 
 
